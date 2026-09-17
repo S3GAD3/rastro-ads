@@ -1,0 +1,96 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RASTRO-ADS</title><link rel="stylesheet" href="styles.css"></head><body>
+<header><img src="assets/rastro-logo.jpg" alt="RASTRO"><div><h1>RASTRO-ADS</h1><p>ANÁLISIS DE MONETIZACIÓN PUBLICITARIA</p></div></header>
+<div class="modebar">
+  <div class="modebar-left">
+    <label class="modelabel">Modo:</label>
+    <select id="workMode"><option value="ephemeral">Efímero (recomendado)</option><option value="session">Sesión</option></select>
+  </div>
+  <button id="newInvestigation" class="ghost" title="Borra los datos de la investigación actual y empieza de nuevo">Nueva investigación</button>
+  <span class="ver-badge">v0.7.0</span>
+</div>
+<nav><button class="tab active" data-view="summary">Resumen</button><button class="tab" data-view="attribution">Atribución</button><button class="tab" data-view="chain">ads.txt</button><button class="tab" data-view="osint">OSINT</button><button class="tab" data-view="vt">VirusTotal</button><button class="tab" data-view="evidence">Evidencia</button><button class="tab authority-tab" data-view="official">Oficial</button></nav>
+<main>
+  <section id="state" class="notice">Pulse «Analizar» para iniciar un análisis pasivo (o «Recargar y capturar» si el anuncio se carga después).</section>
+  <section id="summary" class="view active">
+    <div class="target"><span>OBJETIVO</span><strong id="target">—</strong></div>
+    <div class="metrics"><div><b id="mObserved">0</b><span>Observados</span></div><div><b id="mDirect">0</b><span>Google directos</span></div><div><b id="mReseller">0</b><span>Google reseller</span></div></div>
+    <div class="card conclusion"><h2>Conclusión para el investigador</h2><div id="assessment" class="empty">Análisis pendiente.</div></div>
+    <div class="card guide"><h2>Cómo leer los datos</h2><div class="definition"><b>pub-ID</b><span>Identificador técnico de una cuenta de editor de Google. Por sí solo no revela la persona, el banco ni quién cobró.</span></div><div class="definition"><b>Observado</b><span>Apareció realmente en el código o tráfico de esta carga.</span></div><div class="definition"><b>DIRECT</b><span>El dominio declara relación directa con esa cuenta. No prueba que estuviese activa en esta visita.</span></div><div class="definition"><b>RESELLER</b><span>Intermediario autorizado para vender inventario. No debe atribuirse como propietario, editor ni beneficiario del pago.</span></div><div class="definition"><b>sellers.json</b><span>Registro público del sistema publicitario con nombre, dominio y tipo de vendedor declarados para una cuenta.</span></div><div class="definition"><b>OWNERDOMAIN</b><span>Dominio empresarial que el propio ads.txt declara como propietario del inventario.</span></div><div class="definition"><b>MANAGERDOMAIN</b><span>Dominio de la entidad que declara gestionar las cuentas publicitarias del sitio.</span></div></div>
+    <div class="card"><h2>Tecnologías detectadas</h2><div id="tech" class="chips empty">No analizado.</div></div>
+  </section>
+  <section id="attribution" class="view">
+    <div class="card priority"><h2>IDs prioritarias para identificar al beneficiario</h2><p class="help">Ordenadas por utilidad para solicitar a Google datos de cuenta y pagos. Los píxeles de medición y los RESELLER no se consideran identificadores directos del receptor de ingresos.</p><div id="monetizationLeads" class="empty">No analizado.</div></div>
+    <div class="card priority"><h2>1. Identificadores observados en esta carga</h2><p class="help">Son la evidencia de mayor interés. Pueden proceder del HTML o del tráfico registrado.</p><div id="observedIds" class="empty">No analizado.</div></div>
+    <div class="card"><h2>2. Cuentas Google declaradas como DIRECT</h2><p class="help">Autorizadas directamente por el dominio en ads.txt. Deben cruzarse con los identificadores observados.</p><div id="directIds" class="empty">No analizado.</div></div>
+    <div class="card"><h2>3. Titulares publicados</h2><div id="sellers" class="empty">No consultado.</div></div>
+    <div class="card"><h2>Evidencias técnicas</h2><div id="evidenceList" class="empty">No analizado.</div></div>
+    <div class="card"><h2>Tráfico publicitario</h2><p class="help">Si está vacío, recargue la web, espere a los anuncios y repita el análisis.</p><div id="traffic" class="empty">Sin captura.</div></div>
+    <div class="card"><h2>Marcos de terceros descartados</h2><p class="help">Se conservan para trazabilidad, pero sus identificadores no se atribuyen al dominio investigado.</p><div id="discardedFrames" class="empty">Ninguno.</div></div>
+  </section>
+  <section id="chain" class="view">
+    <div class="metrics"><div><b id="mRows">0</b><span>Relaciones</span></div><div><b id="mAllDirect">0</b><span>Directas</span></div><div><b id="mAllReseller">0</b><span>Reventa</span></div></div>
+    <div class="card"><h2>Declaraciones del dominio</h2><div id="adsMeta" class="empty">No encontradas.</div></div>
+    <div class="card"><h2>Google DIRECT — prioritario</h2><div id="googleDirectRows" class="empty">No analizado.</div></div>
+    <div class="card"><h2>Explorar el ads.txt completo</h2><div class="filters"><select id="adsFilter"><option value="ALL">Todos</option><option value="DIRECT">Solo DIRECT</option><option value="RESELLER">Solo RESELLER</option><option value="GOOGLE">Solo Google</option></select><input id="adsSearch" placeholder="Buscar sistema o ID"></div><div id="adsRows" class="empty">No consultado.</div><button id="moreRows" class="wide" hidden>Mostrar más</button></div>
+    <div class="card"><h2>app-ads.txt</h2><p class="help">Se consulta bajo demanda; relevante si el objetivo también es un editor de apps.</p><button id="fetchAppAds" class="wide">Consultar app-ads.txt</button><div id="appAdsResult" class="empty">No consultado.</div></div>
+  </section>
+  <section id="osint" class="view">
+    <div class="card priority"><h2>Matriz de identificadores por proveedor</h2><p class="help">Cada hallazgo conserva su procedencia. «Alta» significa que fue observado en tráfico o corroborado por más de una fuente; no equivale a atribución personal.</p><div id="providerFindings" class="empty">No analizado.</div></div>
+    <div class="card"><h2>Indicios OSINT adicionales</h2><p class="help">IDs de analítica, wallets, IBAN y contactos hallados en el documento principal. Útiles como pivote hacia otras webs del mismo actor, incluso sin monetización publicitaria. Siempre requieren corroboración.</p><div id="osintNotice" class="empty">No analizado.</div></div>
+    <div class="card"><h2>IDs de analítica y seguimiento</h2><p class="help">El mismo ID reutilizado en varias webs sospechosas es un indicio de que las controla el mismo actor, aunque no compartan servidor.</p><div id="osintAnalytics" class="empty">No analizado.</div></div>
+    <div class="card"><h2>Criptomonedas e IBAN</h2><div id="osintWallets" class="empty">No analizado.</div></div>
+    <div class="card priority"><h2>Contactos — alta confianza</h2><p class="help">Enlaces de acción explícitos (mailto:, tel:, wa.me, t.me) que el propio sitio declaró como su canal de contacto.</p><div id="osintContactsHigh" class="empty">No analizado.</div></div>
+    <div class="card"><h2>Contactos — por patrón</h2><p class="help">Coincidencias de texto libre; pueden ser ejemplos, datos de terceros citados en el contenido, o falsos positivos.</p><div id="osintContactsPattern" class="empty">No analizado.</div></div>
+  </section>
+  <section id="vt" class="view">
+    <div class="card vt-card"><h2>VirusTotal — integración opcional</h2><p class="help">Requiere una API key compatible con el caso de uso. En modo sesión, la clave permanece solo durante la sesión del navegador; en modo efímero, solo en memoria mientras el popup está abierto. Nunca se exporta.</p><div class="keyline"><input id="vtKey" type="password" autocomplete="off" spellcheck="false" placeholder="API key de VirusTotal"><button id="saveKey">Activar</button></div><div id="vtStatus" class="status neutral">Modo opcional desactivado.</div><div class="keyactions"><button id="queryVt" disabled>Consultar dominio</button><button id="clearKey" disabled>Eliminar clave</button></div></div>
+    <div class="card"><h2>Reputación y contexto</h2><div id="vtSummary" class="empty">Puede utilizar RASTRO-ADS sin VirusTotal.</div></div><div class="card"><h2>Infraestructura y relaciones</h2><div id="vtRelations" class="empty">Sin consulta.</div></div>
+  </section>
+  <section id="evidence" class="view">
+    <div class="card"><h2>Exportación probatoria</h2><p class="help">Genera un paquete ZIP con manifiesto SHA-256 verificable. La inclusión de cada elemento es voluntaria y solo se produce al pulsar «Generar paquete».</p>
+      <div class="checklist">
+        <label><input type="checkbox" id="artDom" checked> DOM de la página investigada</label>
+        <label><input type="checkbox" id="artMeta" checked> Metadatos de la página</label>
+        <label><input type="checkbox" id="artTraffic" checked> Tráfico HTTP disponible</label>
+        <label><input type="checkbox" id="artAdsTxt" checked> ads.txt</label>
+        <label><input type="checkbox" id="artAppAdsTxt"> app-ads.txt (si se consultó)</label>
+        <label><input type="checkbox" id="artSellers" checked> sellers.json (registros relevantes)</label>
+        <label><input type="checkbox" id="artOsint" checked> Indicios OSINT (analítica, wallets, contactos)</label>
+        <label><input type="checkbox" id="artResults" checked> Resultados y conclusiones</label>
+        <label><input type="checkbox" id="artNotes"> Notas del investigador</label>
+        <label><input type="checkbox" id="artWarnings" checked> Registro técnico de advertencias</label>
+      </div>
+      <textarea id="investigatorNotes" placeholder="Notas del investigador (opcional; se incluyen solo si marca la casilla anterior)" rows="3"></textarea>
+    </div>
+    <div class="card"><h2>Perfil España/UE (informativo)</h2><label class="switchline"><input type="checkbox" id="esProfile"> Activar perfil España/UE en el informe y el manifiesto</label>
+      <div id="esFields" class="es-fields" hidden>
+        <input id="esRef" placeholder="Referencia de actuación / expediente (opcional)">
+        <input id="esUnit" placeholder="Unidad (opcional)">
+        <input id="esInvestigator" placeholder="Investigador (opcional)">
+        <input id="esDate" placeholder="Fecha/hora declarada (opcional)">
+        <textarea id="esObs" placeholder="Observaciones de adquisición (opcional)" rows="2"></textarea>
+      </div>
+      <p class="caution" id="esText"></p>
+    </div>
+    <div class="card"><button id="genEvidence" class="wide primary">Generar paquete de evidencia (ZIP)</button><div id="evidenceStatus" class="status neutral">Sin generar.</div></div>
+    <div class="card"><h2>Verificador local</h2><p class="help">Seleccione el ZIP exportado, o el manifest.json junto con los demás archivos extraídos, para recalcular sus SHA-256 localmente. No se envía nada a ningún servidor.</p>
+      <input type="file" id="verifyFiles" multiple>
+      <button id="runVerify" class="wide">Verificar</button>
+      <div id="verifyResult" class="empty">Sin verificar.</div>
+    </div>
+  </section>
+  <section id="official" class="view">
+    <div class="authority"><b>USO RESTRINGIDO</b><span>Referencia para autoridades policiales y judiciales. No es un formulario, requerimiento ni asesoramiento jurídico.</span></div>
+    <div class="card"><h2>Identificadores para la solicitud</h2><div id="officialRefs" class="empty">Analice primero una página.</div></div>
+    <div class="card priority"><h2>Otros identificadores localizados — cada uno a su proveedor</h2><p class="help">No son de Google: cada proveedor requiere su propio cauce de solicitud. El ID no identifica a la persona por sí solo, pero es el dato técnico que debe acompañar la solicitud a ese proveedor, igual que el <code>pub-ID</code> con Google.</p><div id="officialOsint" class="empty">Analice primero una página.</div></div>
+    <div class="card"><h2>Orientación específica por proveedor detectado</h2><p class="help">Categorías orientativas, únicamente si existen, se conservan, resultan necesarias y existe habilitación legal.</p><div id="providerRequests" class="empty">Analice primero una página.</div></div>
+    <div class="card"><h2>Datos que cabría interesar a Google</h2><p class="help">Siempre con habilitación legal, periodo delimitado y la fórmula «si existen y se conservan».</p><ul class="request-list"><li><b>Identidad de cuenta:</b> titular, fecha de alta, estado, contactos y producto —AdSense o Ad Manager—.</li><li><b>Pagos:</b> perfil de pagos, beneficiario, identidad fiscal, medio de abono e historial del periodo.</li><li><b>Activos vinculados:</b> dominios, sitios, unidades publicitarias y otras cuentas relacionadas.</li><li><b>Administración:</b> usuarios administradores, roles, vinculaciones y cambios relevantes.</li><li><b>Accesos:</b> registros disponibles de IP, fecha/hora, dispositivo o agente de usuario.</li><li><b>Preservación:</b> conservación urgente de datos, cuando proceda legalmente.</li></ul></div>
+    <div class="card"><h2>Información para que Google identifique el objeto</h2><ul class="request-list"><li>Número de procedimiento, autoridad requirente y datos oficiales de contacto.</li><li>Producto de Google afectado: AdSense, Ad Manager o ambos si no puede determinarse.</li><li>Cada identificador <code>pub-…</code> completo y su origen: observado, DIRECT o RESELLER.</li><li>Dominio, URL exacta, copia de la línea relevante de ads.txt y titular de sellers.json.</li><li>Fecha de captura en UTC y periodo temporal sobre el que se solicitan datos.</li><li>Categorías concretas requeridas y relación con los hechos investigados.</li><li>Base jurídica, instrumento procesal y requisitos de confidencialidad aplicables.</li></ul></div>
+    <div class="card warning"><h2>Criterios de precisión</h2><ul class="request-list"><li>Identificar cada <code>pub-…</code> completo.</li><li>Incluir URL, zona horaria y periodo temporal.</li><li>Distinguir cuenta observada de cuenta meramente autorizada en ads.txt.</li><li>Explicar la relación del dato con los hechos investigados.</li><li>Solicitar únicamente categorías necesarias y proporcionadas.</li></ul></div>
+    <div class="card"><h2>Perfil España/UE — referencia prudente a LERS</h2><p class="small">La documentación generada puede servir como material técnico auxiliar para una incorporación posterior a los sistemas y procedimientos oficiales que resulten aplicables, incluido LERS cuando corresponda. RASTRO-ADS no está integrado con LERS ni sustituye los procedimientos, diligencias, validaciones o requisitos establecidos por la organización competente.</p></div>
+    <div class="official-links"><a href="https://policies.google.com/terms/information-requests?hl=es" target="_blank" rel="noopener noreferrer">Política oficial de Google</a><a href="https://support.google.com/transparencyreport/answer/9713961?hl=es" target="_blank" rel="noopener noreferrer">Sistema para organismos verificados</a></div>
+  </section>
+</main>
+<footer><button id="capture" class="capture">Recargar y capturar</button><button id="analyze" class="primary">Analizar</button><button id="exportTxt" disabled>TXT</button><button id="exportHtml" disabled>HTML</button></footer>
+<script type="module" src="popup.js"></script>
+</body></html>

@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "RASTRO-ADS",
+  "version": "0.7.0",
+  "description": "Análisis pasivo de monetización y cadenas publicitarias para investigación OSINT, con exportación probatoria verificable (SHA-256).",
+  "permissions": ["activeTab", "storage", "tabs", "webRequest", "scripting"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "action": {
+    "default_title": "Analizar publicidad con RASTRO-ADS",
+    "default_popup": "popup.html",
+    "default_icon": { "16": "icons/icon16.png", "32": "icons/icon32.png", "48": "icons/icon48.png", "128": "icons/icon128.png" }
+  },
+  "icons": { "16": "icons/icon16.png", "32": "icons/icon32.png", "48": "icons/icon48.png", "128": "icons/icon128.png" },
+  "content_scripts": [{
+    "matches": ["http://*/*", "https://*/*"],
+    "js": ["content.js"],
+    "run_at": "document_idle",
+    "all_frames": true,
+    "match_about_blank": true
+  }]
+}
