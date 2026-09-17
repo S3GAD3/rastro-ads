@@ -7,6 +7,8 @@ RASTRO-ADS es una extensión para navegadores Chromium que ayuda a documentar in
 **Licencia:** MIT
 
 > RASTRO-ADS no identifica por sí sola a una persona. Obtiene pivotes técnicos que pueden permitir a una autoridad competente solicitar a Google, Meta, TikTok, Microsoft u otro proveedor los datos que conserve y que legalmente pueda facilitar.
+>
+> Puede descargarla en el apartado "releases": https://github.com/S3GAD3/rastro-ads/releases
 
 ## Qué problema resuelve
 
